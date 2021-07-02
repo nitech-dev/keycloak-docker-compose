@@ -49,13 +49,15 @@ services:
   postgres:
     image: 'postgres:alpine'
     volumes:
-      - "./data/postgres:/var/lib/postgresql/data"
+      - "postgres_data:/var/lib/postgresql/data"
     restart: 'always'
     environment:
       POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: replaceWithVeryLongPasswordForPGSQL
+      POSTGRES_PASSWORD: _pwd:postgres_
       POSTGRES_DB: keycloak
       POSTGRES_HOST: postgres
+    ports:
+        - "5434:5432"
   
   keycloak:
     image: jboss/keycloak
@@ -66,10 +68,10 @@ services:
       DB_PORT: 5432
       DB_DATABASE: keycloak
       DB_USER: keycloak
-      DB_PASSWORD: replaceWithVeryLongPasswordForPGSQL
+      DB_PASSWORD: _pwd:postgres_
       # COMMENT OUT TWO LINES BELOW AFTER THE FIRST START
       KEYCLOAK_USER: admin
-      KEYCLOAK_PASSWORD: replaceWithVeryLongPasswordForAdminUser
+      KEYCLOAK_PASSWORD: _pwd:admin:keycloak_
       PROXY_ADDRESS_FORWARDING: 'true'
       JGROUPS_DISCOVERY_PROTOCOL: JDBC_PING
       JGROUPS_DISCOVERY_PROPERTIES: datasource_jndi_name=java:jboss/datasources/KeycloakDS,info_writer_sleep_time=500,initialize_sql="CREATE TABLE IF NOT EXISTS JGROUPSPING ( own_addr varchar(200) NOT NULL, cluster_name varchar(200) NOT NULL, created timestamp default current_timestamp, ping_data BYTEA, constraint PK_JGROUPSPING PRIMARY KEY (own_addr, cluster_name))"
@@ -83,6 +85,11 @@ services:
 
 volumes:
   vhostd_volume:
+    driver: local
   confd_volume:
+    driver: local
   nginx_html:
+      driver: local
+  postgres_data:
+      driver: local
   
